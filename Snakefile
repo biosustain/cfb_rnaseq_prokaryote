@@ -55,7 +55,7 @@ rule all:
 
 rule test:
     input:
-        'sample_template.yaml'
+        'sample.yaml'
     output:
         'test.out'
     shell:
