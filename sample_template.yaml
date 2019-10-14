@@ -1,0 +1,4 @@
+---
+sample: strain_001
+raw_read_path: /mnt/raw_reads/raw_read_path
+reference_path: /mnt/reference-genomes/organism_001
