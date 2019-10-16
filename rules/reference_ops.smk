@@ -1,126 +1,89 @@
-rule pl_convert_gb_to_gff:
-    input:
-        lambda wildcards: [ref for ref in config['references']['gb_refs'] 
-                                 if splitext(basename(ref))[0] == wildcards.reference][0]
-    output:
-        'references/gff3_from_gb/{reference}.gff3'
-    conda:
-        '../envs/pl_gb2gff3.yaml'
-    threads: 1
-    log:
-        'logs/pl_convert_gb_to_gff/{reference}.log'
-    shell:
-    # have to include the BIO and LWP modules from 5.22.0 
-    # since conda perl-bioperl kind of broken.
-        'perl -I ${{CONDA_PREFIX}}/lib/perl5/site_perl/5.22.0 '
-        '${{CONDA_PREFIX}}/bin/bp_genbank2gff3.pl {input} '
-        '-o stdout 1> {output} '
-        '2> {log} '
-
-rule fasta_from_genbank:
-    input:
-        lambda wildcards: [ref for ref in config['references']['gb_refs'] 
-                                 if splitext(basename(ref))[0] == wildcards.reference][0]
-    output:
-        'references/fasta_from_gb/{reference}.fa'
-    threads: 1
-    log:
-        'logs/readseq/{reference}.log'
-    params:
-        '-C -f fa'
-    wrapper:
-        f'{wrapper_source}/bio/readseq'
-    
-rule concat_reference_gff3s:
-    input:
-        ([ref for ref in config['references']['gff_refs']] 
-              if config['references']['gff_refs'] != ['None'] else []) + 
-        (['references/gff3_from_gb/'+splitext(basename(ref))[0]+'.gff3' 
-              for ref in  config['references']['gb_refs']] 
-              if config['references']['gb_refs'] != ['None'] else []) 
-    output:
-        'references/combined.gff3'
-    shell:
-        'cat {input} > references/combined.gff3'
-
-rule concat_reference_fastas:
-    input:
-        ([ref for ref in config['references']['fa_refs']] 
-              if config['references']['fa_refs'] != ['None'] else []) + 
-        (['references/fasta_from_gb/'+splitext(basename(ref))[0]+'.fa' 
-              for ref in  config['references']['gb_refs']] 
-              if config['references']['gb_refs'] != ['None'] else []) 
-    output: # generates a full sequence, but the name has to match the gff reference used.
-        'references/combined_only_CDS_no_pseudo.fa'
-    threads: 1
-    log:
-        'logs/concat_reference_fastas.log'
-    shell:
-        'cat {input} > references/combined_only_CDS_no_pseudo.fa'
-
 rule generate_gff3_reference:
     input:
-        'references/combined.gff3'
+        reference_gff
     output:
-        'references/combined_gffread.gff3'
+        'references/{reference_id}_processed.gff'
+    conda: '../envs/gffread.yaml'
     threads: 1
     log:
-        'logs/gffread/combined_gffread.log'
+        'logs/gffread/{reference_id}_processed.log'
     params:
         '-F'
-    wrapper:
-        f'{wrapper_source}/bio/gffread'
+    shell:
+        'gffread {input} -o {output} {params} > {log} 2>&1'
+
 
 rule generate_masked_reference:
     input:
-        'references/combined_gffread.gff3'
+        'references/{reference_id}_processed.gff'
     output:
-        'references/combined_only_CDS_no_pseudo.gff3'
+        'references/{reference_id}_filtered.gff'
+    conda: '../envs/gffread.yaml'
     threads: 1
     log:
-        'logs/gffread/combined_only_CDS_no_pseudo.log'
+        'logs/gffread/{reference_id}_filtered.log'
     params:
         '-CF --no-pseudo'
-    wrapper:
-        f'{wrapper_source}/bio/gffread'    
+    shell:
+        'gffread {input} -o {output} {params} > {log} 2>&1'
+
+
+# Some pseudogenes are not marked. They don't seem to have a protein_id, which
+# is the attribute we want to use. Here, I eliminate those lines.
+rule generate_filtered_reference:
+    input:
+         'references/{reference_id}_filtered.gff'
+    output:
+        'references/{reference_id}_masked.gff'
+    threads: 1
+    log:
+        'logs/gffread/{reference_id}_masked.log'
+    run:
+        with open(f'{input}', 'r') as infile:
+            with open(f'{output}', 'w') as outfile:
+                for line in infile.readlines():
+                    if ('\tCDS' in line) and (';protein_id=' not in line):
+                        continue
+                    outfile.writelines(line)
+
 
 rule generate_mask_reference:
     input:
-        in1='references/combined_gffread.gff3',
-        in2='references/combined_only_CDS_no_pseudo.gff3'
+        in1='references/{reference_id}_processed.gff',
+        in2='references/{reference_id}_masked.gff'
     output:
-        'references/combined_mask.gff3'
+        'references/{reference_id}_mask.gff'
+    conda:
+        '../envs/bedtools.yaml'
     threads: 1
     log:
-        'logs/bedtools/subtract/combined_mask.log'
+        'logs/bedtools/subtract/{reference_id}.log'
     params:
-        ""
-    wrapper:
-        f'{wrapper_source}/bio/bedtools/subtract'
+        ''
+    shell:
+         """
+bedtools subtract {params} \
+-a {input.in1} -b {input.in2} \
+1> {output} \
+2> {log}
+        """
 
-rule generate_mask_bed:
+
+rule generate_bed:
     input:
-        'references/{reference}.gff3'
+        'references/{reference}.gff'
     output:
         'references/{reference}.bed'
+    conda:
+        '../envs/bedops.yaml'
     threads: 1
     log:
         'logs/bedops/gff2bed/{reference}.log'
     params:
-        ""
-    wrapper:
-        f'{wrapper_source}/bio/bedops/gff2bed'
-
-rule generate_mask_fasta:
-    input:
-        in1='references/combined_only_CDS_no_pseudo.fa',
-        in2='references/combined_mask.gff3'
-    output:
-        'references/combined_mask.fa'
-    threads: 1
-    log:
-        'logs/bedtools/getfasta/combined_mask.log'
-    params:
-        ""
-    wrapper:
-        f'{wrapper_source}/bio/bedtools/getfasta'
+        ''
+    shell:
+        """
+(gff2bed {params} \
+< {input} > {output}) \
+> {log}
+        """

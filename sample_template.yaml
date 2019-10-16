@@ -1,4 +1,6 @@
 ---
-sample: strain_001
+sample_id: strain_001
 raw_read_path: /mnt/raw_reads/raw_read_path
-reference_path: /mnt/reference-genomes/organism_001
+reference_id: organism_001
+reference_fasta: /mnt/reference-genomes/organism_001/organism_001.fa
+reference_gff: /mnt/reference-genomes/organism_001/organism_001.gff
