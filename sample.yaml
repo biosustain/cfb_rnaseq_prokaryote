@@ -1,6 +1,6 @@
 ---
-sample_id: strain_001
-raw_read_path: /mnt/raw_reads/raw_read_path
-reference_id: organism_001
-reference_fasta: /mnt/reference-genomes/organism_001/organism_001.fa
-reference_gff: /mnt/reference-genomes/organism_001/organism_001.gff
+sample_id: ecoli_01
+raw_read_path: test/data/reads
+reference_id: GCF_000005845.2
+reference_fasta: test/data/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.fna
+reference_gff: test/data/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.gff

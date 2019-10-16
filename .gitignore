@@ -1,9 +1,4 @@
 *
-!scripts
-!scripts/*
-!scripts/common
-!scripts/common/*
-scripts/.snakemake*
 !Snakefile
 !config.yaml
 !samples.tsv
@@ -16,9 +11,9 @@ scripts/.snakemake*
 !README.md
 !rules
 !rules/*
+!test
+!test/*
 !.gitignore
 !.gitattributes
 !.editorconfig
 !.travis.yml
-!.test
-!/sample.yaml
