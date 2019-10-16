@@ -4,19 +4,20 @@
 import yaml
 import re
 from glob import glob
-# from os.path import basename, splitext
-# from os import symlink, makedirs, chdir
-# import pandas as pd
 
 
-configfile: "config.yaml"
-# report: "report/workflow.rst"
+# it's better to assign configfile from the command line with "--configfile"
+# configfile: "config.yaml"
+workdir: config['workdir']
+
+# report: "report/workflow.rst"  # not working of this yet
 
 # get snakemake wrapper version to be used in this pipeline
 wrapper_version = config['wrapper_version']
 
+
 # reads sample_id, raw_read_path, reference_id and reference_path from sample.yaml
-with open('sample.yaml', 'r') as file:
+with open(f'{config["workdir"]}/sample.yaml', 'r') as file:
     sample_details = yaml.load(file, yaml.FullLoader)
     sample_id = sample_details['sample_id']
     raw_read_path = sample_details['raw_read_path']
