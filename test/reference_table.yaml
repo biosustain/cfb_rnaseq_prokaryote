@@ -1,0 +1,6 @@
+---
+# for each reference id, include one fasta and one gff file that is either
+# relative to workdir, or and absolute path.
+GCF_000005845.2:
+  fasta: data/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.fna
+  gff: data/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.gff

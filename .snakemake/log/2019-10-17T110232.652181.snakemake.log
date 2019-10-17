@@ -1,0 +1,5 @@
+Building DAG of jobs...
+Conda environment envs/hisat2.yaml will be created.
+Conda environment envs/gffread.yaml will be created.
+Conda environment https:/github.com/snakemake/snakemake-wrappers/raw/0.39.0/bio/trimmomatic/pe/environment.yaml will be created.
+Conda environment envs/featureCounts.yaml will be created.

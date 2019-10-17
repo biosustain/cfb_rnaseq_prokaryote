@@ -8,24 +8,25 @@ from glob import glob
 
 # it's better to assign configfile from the command line with "--configfile"
 # configfile: "config.yaml"
-workdir: config['workdir']
-sample_id = config['sample_id']
 
 # report: "report/workflow.rst"  # not working of this yet
 
 # get snakemake wrapper version to be used in this pipeline
 wrapper_version = config['wrapper_version']
 
-# get/check sample_id, raw_read_path and reference details from sample.yaml
-with open(f'{sample_id}.yaml', 'r') as file:
-    sample_details = yaml.load(file, yaml.FullLoader)
-    assert (sample_id == sample_details['sample_id']), \
-        f'Sample_id in "{sample_id}.yaml" do not match config["sample_id"].'
-    raw_read_path = sample_details['raw_read_path']
-    reference_id = sample_details['reference_id']
-    reference_fasta = sample_details['reference_fasta']
-    reference_gff = sample_details['reference_gff']
+# get sample and reference details through config input
+sample_id = config['sample_id']
+raw_read_path = config['raw_read_path']
+reference_id = config['reference_id']
+reference_table = config['reference_table']
 
+# find reference fasta and gff
+with open(reference_table, 'r') as file:
+    reference_table = yaml.load(file, yaml.FullLoader)
+    reference_fasta = reference_table[reference_id]['fasta']
+    reference_gff = reference_table[reference_id]['gff']
+
+# find sample read files under raw_read_path
 sample_to_files = {sample_id: []}
 # re pattern for filenames in samplename_S#_L00#_R#_00#.fastq.gz format
 # (recent illumina filename format)
@@ -41,6 +42,7 @@ sampleNumbers = set()
 for x in glob('{}/**/*.gz'.format(raw_read_path), recursive=True):
     filename = x.split('/')[-1]
     pm = p1.match(filename)
+
     if pm:
         sampleName = pm.group(1)
         if sampleName == sample_id:
@@ -51,7 +53,7 @@ for x in glob('{}/**/*.gz'.format(raw_read_path), recursive=True):
 assert (len(sample_to_files[sample_id]) > 0), \
     f'No read files matching {sample_id} found.'
 
-# make sure read files have the sample illumina sample number (..._S#_...)
+# make sure read files have the same sample illumina sample number (..._S#_...)
 assert (len(sampleNumbers) == 1), \
     f'Illumina sample numbers are not unique for {sample_id}: {sampleNumbers}'
 

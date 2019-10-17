@@ -2,5 +2,5 @@
 sample_id: sample
 raw_read_path: test/data/reads
 reference_id: GCF_000005845.2
-reference_fasta: test/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.fna
-reference_gff: test/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.gff
+reference_fasta: test/data/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.fna
+reference_gff: test/data/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.gff

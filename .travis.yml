@@ -1,7 +1,7 @@
 language: python
 python:
   # We don't actually use the Travis Python, but this keeps it organized.
-  - "3.6"
+  - "3.7"
 
 install:
   - sudo apt-get update
@@ -23,5 +23,17 @@ install:
 script:
   - source activate snakemake
   # run the workflow
-  # put a test case into the subfolder .test (e.g., use https://github.com/snakemake-workflows/ngs-test-data as a submodule)
-  - snakemake --use-conda --directory .test
+  # put a test case into the subfolder test (e.g., use https://github.com/snakemake-workflows/ngs-test-data as a submodule)
+  - >
+    snakemake all
+              --snakefile Snakefile
+              --configfile config.yaml
+              --directory test
+              --config sample_id=ecoli_01
+                       raw_read_path=data
+                       reference_id=GCF_000005845.2
+                       reference_table=reference_table.yaml
+              --use-conda
+              --conda-prefix conda_envs
+              --cores 4
+              -np
