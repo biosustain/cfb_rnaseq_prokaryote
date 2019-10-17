@@ -1,5 +1,5 @@
 ---
-sample_id: ecoli_01
+sample_id: sample
 raw_read_path: test/data/reads
 reference_id: GCF_000005845.2
 reference_fasta: test/reference-genomes/Escherichia_coli/GCF_000005845.2/GCF_000005845.2_ASM584v2_genomic.fna

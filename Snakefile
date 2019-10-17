@@ -9,48 +9,52 @@ from glob import glob
 # it's better to assign configfile from the command line with "--configfile"
 # configfile: "config.yaml"
 workdir: config['workdir']
+sample_id = config['sample_id']
 
 # report: "report/workflow.rst"  # not working of this yet
 
 # get snakemake wrapper version to be used in this pipeline
 wrapper_version = config['wrapper_version']
 
-
-# reads sample_id, raw_read_path, reference_id and reference_path from sample.yaml
-with open(f'{config["workdir"]}/sample.yaml', 'r') as file:
+# get/check sample_id, raw_read_path and reference details from sample.yaml
+with open(f'{sample_id}.yaml', 'r') as file:
     sample_details = yaml.load(file, yaml.FullLoader)
-    sample_id = sample_details['sample_id']
+    assert (sample_id == sample_details['sample_id']), \
+        f'Sample_id in "{sample_id}.yaml" do not match config["sample_id"].'
     raw_read_path = sample_details['raw_read_path']
     reference_id = sample_details['reference_id']
     reference_fasta = sample_details['reference_fasta']
     reference_gff = sample_details['reference_gff']
 
 sample_to_files = {sample_id: []}
-# re pattern for filenames in samplename_S#_L00#_R#_00#.fastq.gz format (recent illumina filename format)
+# re pattern for filenames in samplename_S#_L00#_R#_00#.fastq.gz format
+# (recent illumina filename format)
 p1 = re.compile('^(.*)(_S[0-9]+)(_L00[1-4])(_R[12])(_[0-9]{3}[\S]*\.fastq\.gz)$')
-# older file name patterns - not supported any longer:
-# # re pattern for filenames in samplename_S#_R#_00#.fastq.gz format. (probably pre_nextseq)
-# # p2 = re.compile('^(.*)(_S[0-9]+)(_R[12])(_[0-9]{3}[\S]*\.fastq\.gz)$')
-# # re pattern for filenames in samplename.f.slx.gz format. (probably very early solexa reads)
-# # p3 = re.compile('^(.*)(\.f\.slx[\S]*\.gz)$')
-# # [\S]* is to accommodate for trimmed reads
+# older file name patterns below are not supported any longer:
+# re pattern for filenames in samplename_S#_R#_00#.fastq.gz format.
+# (probably pre_nextseq)
+# p2 = re.compile('^(.*)(_S[0-9]+)(_R[12])(_[0-9]{3}[\S]*\.fastq\.gz)$')
+# re pattern for filenames in sampleName.f.slx.gz format.
+# (probably very early solexa reads) ([\S]* is to accommodate for trimmed reads)
+# p3 = re.compile('^(.*)(\.f\.slx[\S]*\.gz)$')
+sampleNumbers = set()
 for x in glob('{}/**/*.gz'.format(raw_read_path), recursive=True):
     filename = x.split('/')[-1]
     pm = p1.match(filename)
     if pm:
-        group = pm.group(1)
-    else:
-        raise ValueError('Filename does not match recognized format for grouping:\n{}'.format(x))
-        # pm = p2.match(filename)
-        # if pm:
-        #     group = pm.group(1)
-        # else:
-        #     pm = p3.match(filename)
-        #     if pm:
-        #         group = pm.group(1)
-        #     else:
-        #         raise ValueError('Filename does not match recognized format for grouping:\n{}'.format(x))
-    sample_to_files[sample_id].append(x)
+        sampleName = pm.group(1)
+        if sampleName == sample_id:
+            sampleNumbers.add(pm.group(2))
+            sample_to_files[sampleName].append(x)
+
+# make sure there are read files for the sample:
+assert (len(sample_to_files[sample_id]) > 0), \
+    f'No read files matching {sample_id} found.'
+
+# make sure read files have the sample illumina sample number (..._S#_...)
+assert (len(sampleNumbers) == 1), \
+    f'Illumina sample numbers are not unique for {sample_id}: {sampleNumbers}'
+
 # keep things sorted
 sample_to_files[sample_id] = sorted(sample_to_files[sample_id])
 
@@ -61,7 +65,6 @@ rule all:
         f'hisat2/align/{sample_id}.accepted_hits.bam',
         # counts ready for db
         f'hisat2/align/{sample_id}.counts_for_db.csv',
-
 
 
 # The first rule should define the default target files

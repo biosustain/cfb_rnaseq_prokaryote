@@ -2,8 +2,6 @@
 !Snakefile
 !config.yaml
 !samples.tsv
-!resources
-!resources/*
 !envs
 !envs/*
 !environment.yaml
@@ -12,7 +10,9 @@
 !rules
 !rules/*
 !test
-!test/*
+!test/data
+!test/reference-genomes
+!test/ecoli_01.yaml
 !.gitignore
 !.gitattributes
 !.editorconfig
