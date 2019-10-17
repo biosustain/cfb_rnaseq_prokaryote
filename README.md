@@ -28,8 +28,8 @@ Currently, several parameters are fixed (eg: for trimmer with trimmomatic, mask 
 ## Usage
 
     snakemake --snakefile /path_to_this_pipeline/Snakefile \
-              --directory /path_to_analysis_folder \
               --configfile /path_to_this_pipeline/config.yaml \
+              --directory /path_to_analysis_folder \
               --config sample_id=sample \
                        raw_read_path=/path_to_reads \
                        reference_id=reference_id \

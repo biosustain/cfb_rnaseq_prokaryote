@@ -8,7 +8,7 @@ rule generate_gff3_reference:
     log:
         'logs/gffread/{reference_id}_processed.log'
     params:
-        '-F'
+        '-F --keep-exon-attrs'
     shell:
         'gffread {input} -o {output} {params} > {log} 2>&1'
 
@@ -23,7 +23,7 @@ rule generate_masked_reference:
     log:
         'logs/gffread/{reference_id}_filtered.log'
     params:
-        '-CF --no-pseudo'
+        '-CF --no-pseudo --keep-exon-attrs'
     shell:
         'gffread {input} -o {output} {params} > {log} 2>&1'
 
