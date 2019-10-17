@@ -1,3 +1,0 @@
-FileNotFoundError in line 13 of /Users/emre/Dev/cfb_rnaseq_prokaryote/Snakefile:
-[Errno 2] No such file or directory: 'sample.yaml'
-  File "/Users/emre/Dev/cfb_rnaseq_prokaryote/Snakefile", line 13, in <module>

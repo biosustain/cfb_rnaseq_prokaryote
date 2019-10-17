@@ -1,3 +1,0 @@
-AssertionError in line 52 of /Users/emre/Dev/cfb_rnaseq_prokaryote/Snakefile:
-Illumina sample numbers are not unique for sample: set()
-  File "/Users/emre/Dev/cfb_rnaseq_prokaryote/Snakefile", line 52, in <module>

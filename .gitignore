@@ -5,3 +5,4 @@
 /test/reads/
 /test/references/
 /test/conda_envs/
+/.snakemake/

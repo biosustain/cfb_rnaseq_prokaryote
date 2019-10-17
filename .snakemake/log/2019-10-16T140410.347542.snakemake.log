@@ -1,3 +1,0 @@
-NameError in line 20 of /Users/emre/Dev/cfb_rnaseq_prokaryote/Snakefile:
-name 'workdir' is not defined
-  File "/Users/emre/Dev/cfb_rnaseq_prokaryote/Snakefile", line 20, in <module>
