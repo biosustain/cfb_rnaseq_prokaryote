@@ -66,11 +66,44 @@ rule all:
         # hisat2 alignments
         f'hisat2/align/{sample_id}.accepted_hits.bam',
         # counts ready for db
-        f'hisat2/align/{sample_id}.counts_for_db.csv',
+        expand('hisat2/align/{sample_id}.{feature_type}.counts_for_db.csv',
+               sample_id=[sample_id],
+               feature_type=['CDS', 'gene']),
+        # Concat reads from different lanes (somewhat encumbered names - helps later)
+        expand('reads/raw/raw_{sample_id}_{end}_paired.fastq.gz',
+               sample_id=[sample_id],
+               end=['R1', 'R2']),
+        # Get trimmed reads
+        expand('reads/trimmed/trimmed_{sample_id}_{end}_{pairing}.fastq.gz',
+               sample_id=[sample_id],
+               end=['R1', 'R2'],
+               pairing=['paired', 'unpaired']),
+        # QC for raw concat'ed reads
+        expand('read_QC/{folder}/{read}.{type}',
+               folder=['reads/raw'],
+               read=['_'.join(['raw', sample_id, end, 'paired'])+'.fastq.gz'
+                     for end in ['R1', 'R2']],
+               type=['html', 'zip']),
+        # QC for trimmed reads
+        expand('read_QC/{folder}/{read}.{type}',
+               folder=['reads/trimmed'],
+               read=['_'.join(['trimmed', sample_id, end, pairing])+'.fastq.gz'
+                     for end in ['R1', 'R2']
+                     for pairing in ['paired', 'unpaired']],
+               type=['html', 'zip']),
 
 
-# The first rule should define the default target files
-# Subsequent target rules can be specified below. They should start with all_*.
+# The essentials rule defines the default target files required for warehouse.
+# Subsequent target rules can be specified below and useful for testing.
+
+rule essentials:
+    input:
+        # hisat2 alignments
+        f'hisat2/align/{sample_id}.accepted_hits.bam',
+        # counts ready for db
+        expand('hisat2/align/{sample_id}.{feature_type}.counts_for_db.csv',
+               sample_id=[sample_id],
+               feature_type=['CDS', 'gene']),
 
 
 rule all_read_ops:
@@ -134,11 +167,23 @@ rule all_alignment_ops:
 
 rule all_count_ops:
     input:
+        # # featureCounts output
+        # f'hisat2/align/{sample_id}.featureCounts.out',
+        # f'hisat2/align/{sample_id}.featureCounts.out.summary',
+        # # counts ready for db
+        # f'hisat2/align/{sample_id}.counts_for_db.csv',
         # featureCounts output
-        f'hisat2/align/{sample_id}.featureCounts.out',
-        f'hisat2/align/{sample_id}.featureCounts.out.summary',
+        expand('hisat2/align/{sample_id}.{feature_type}.featureCounts.out',
+               sample_id=[sample_id],
+               feature_type=['CDS', 'gene']),
+        expand('hisat2/align/{sample_id}.{feature_type}.featureCounts.out.summary',
+               sample_id=[sample_id],
+               feature_type=['CDS', 'gene']),
         # counts ready for db
-        f'hisat2/align/{sample_id}.counts_for_db.csv',
+        expand('hisat2/align/{sample_id}.{feature_type}.counts_for_db.csv',
+               sample_id=[sample_id],
+               feature_type=['CDS', 'gene']),
+
 
 
 include: 'rules/read_ops.smk'

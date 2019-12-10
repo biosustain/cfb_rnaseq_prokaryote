@@ -16,4 +16,6 @@ params:
     hisat2:
         align:
             extra: '-q --no-spliced-alignment --rna-strandness RF --dta --new-summary'
-    featureCounts: '-F GTF -O -M --fraction -p -s 2 -t CDS -g protein_id --extraAttributes gene -f'
+    featureCounts:
+        CDS: '-F GTF -O -M --fraction -p -s 2 -t CDS -g ID'
+        gene: '-F GTF -O -M --fraction -p -s 2 -t gene -g ID'

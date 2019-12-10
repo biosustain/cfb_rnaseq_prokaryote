@@ -1,17 +1,18 @@
 rule featureCounts:
     input:
-        reference = f'references/{reference_id}_masked.gff',
+        reference = reference_gff,
+        # reference = f'references/{reference_id}_masked.gff',
         alignment = 'hisat2/align/{sample_id}.accepted_hits.bam'
     output:
-        output = 'hisat2/align/{sample_id}.featureCounts.out',
-        summary = 'hisat2/align/{sample_id}.featureCounts.out.summary'
+        output = 'hisat2/align/{sample_id}.{feature_type}.featureCounts.out',
+        summary = 'hisat2/align/{sample_id}.{feature_type}.featureCounts.out.summary'
     conda:
         '../envs/featureCounts.yaml'
     threads: 4
     params:
-        config['params']['featureCounts']
+        lambda wildcards: config['params']['featureCounts'][wildcards.feature_type]
     log:
-        'logs/feature_counts/{sample_id}.featureCounts.log'
+        'logs/feature_counts/{sample_id}.{feature_type}.featureCounts.log'
     shell:
         """
 (featureCounts \
